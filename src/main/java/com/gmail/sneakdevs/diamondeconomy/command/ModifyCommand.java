@@ -2,6 +2,7 @@ package com.gmail.sneakdevs.diamondeconomy.command;
 
 import com.gmail.sneakdevs.diamondeconomy.DiamondUtils;
 import com.gmail.sneakdevs.diamondeconomy.config.DiamondEconomyConfig;
+import com.gmail.sneakdevs.diamondeconomy.sql.DatabaseManager;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -11,6 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
@@ -46,17 +48,53 @@ public class ModifyCommand {
     }
 
     public static int modifyCommand(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, int amount) {
-        players.forEach(player -> ctx.getSource().sendSuccess(() -> Component.literal((DiamondUtils.getDatabaseManager().changeBalance(player.getStringUUID(), amount)) ? ("Modified " + players.size() + " players money by $" + amount) : ("That would go out of the valid money range for " + player.getName().getString())), true));
+        DatabaseManager dm = DiamondUtils.getDatabaseManager();
+        for (ServerPlayer player : players) {
+            if (dm.changeBalance(player.getStringUUID(), amount)) {
+                ctx.getSource().sendSuccess(() ->
+                        Component.literal(amount >= 0 ? "Increased " : "Decreased")
+                                .append(player.getDisplayName() +"'s account by ")
+                                .append(DiamondEconomyConfig.currencyToLiteral(amount))
+                                .append(". New balance: ")
+                                .append(DiamondEconomyConfig.currencyToString(dm.getBalanceFromUUID(player.getStringUUID())))
+                , true);
+            } else {
+               ctx.getSource().sendFailure(
+                        Component.literal("For ")
+                                .append(player.getDisplayName())
+                                .append(" the balance limit was exceeded. No changes.")
+                                //.withStyle(Style.EMPTY.withColor(0xff5555))
+               );
+            }
+
+        }
         return players.size();
     }
 
     public static int modifyCommand(CommandContext<CommandSourceStack> ctx, int amount, boolean shouldModifyAll) throws CommandSyntaxException {
+        DatabaseManager dm = DiamondUtils.getDatabaseManager();
         if (shouldModifyAll) {
-            DiamondUtils.getDatabaseManager().changeAllBalance(amount);
-            ctx.getSource().sendSuccess(() -> Component.literal(("Modified everyones account by $" + amount)), true);
+            dm.changeAllBalance(amount);
+            ctx.getSource().sendSuccess(() ->
+                    Component.literal(amount >= 0 ? "Increased " : "Decreased")
+                            .append(" everyone's account by ")
+                            .append(DiamondEconomyConfig.currencyToLiteral(amount))
+            , true);
         } else {
-            String output = (DiamondUtils.getDatabaseManager().changeBalance(ctx.getSource().getPlayerOrException().getStringUUID(), amount)) ? ("Modified your money by $" + amount) : ("That would go out of your valid money range");
-            ctx.getSource().sendSuccess(() -> Component.literal(output), true);
+            ServerPlayer player = ctx.getSource().getPlayerOrException();
+            if (dm.changeBalance(player.getStringUUID(), amount)) {
+                ctx.getSource().sendSuccess(() ->
+                        Component.literal(amount >= 0 ? "Increased " : "Decreased")
+                                .append(" your account by ")
+                                .append(DiamondEconomyConfig.currencyToLiteral(amount))
+                                .append(". New balance: ")
+                                .append(DiamondEconomyConfig.currencyToString(dm.getBalanceFromUUID(player.getStringUUID())))
+                , true);
+            } else {
+               ctx.getSource().sendFailure(
+                       Component.literal("The balance limit for your account was exceeded. No changes.")
+               );
+            }
         }
         return 1;
     }

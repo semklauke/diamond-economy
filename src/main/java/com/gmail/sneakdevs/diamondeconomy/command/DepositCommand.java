@@ -10,10 +10,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 public class DepositCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> buildCommand(){
@@ -47,10 +46,15 @@ public class DepositCommand {
             }
         }
         if (dm.changeBalance(player.getStringUUID(), currencyCount)) {
-            String output = "Added $" + currencyCount + " to your account";
-            ctx.getSource().sendSuccess(() -> Component.literal(output), false);
+            int finalCurrencyCount = currencyCount;
+            ctx.getSource().sendSuccess(() ->
+                    Component.literal("Added ")
+                            .append(DiamondEconomyConfig.currencyToLiteral(finalCurrencyCount))
+                            .append(" to your account")
+            , false);
         } else {
             DiamondUtils.dropItem(currencyCount, player);
+            throw CommandExceptions.MAX_BALANCE_ERROR.create();
         }
         return 1;
     }
@@ -72,21 +76,28 @@ public class DepositCommand {
         }
         if (hand.isEmpty() || i == -1) {
             // Hand has no item
-            throw CommandExceptions.INVENTORY_ERROR.create(
-                "Put a currency item in your hand or use the '/" + DiamondEconomyConfig.getInstance().depositCommandName +
-                " deposit inv [amount]' command."
+            ctx.getSource().sendFailure(
+                Component.empty()
+                        .append("Put a currency item in your hand or use the /")
+                        .append(Component.literal(DiamondEconomyConfig.getInstance().depositCommandName + " deposit inv [amount]")
+                                        .withStyle(Style.EMPTY.withItalic(true))
+                        )
+                        .append("command.")
             );
         }
 
         // add balance to account
-        int currencyCount = hand.getCount() * DiamondEconomyConfig.getCurrencyValues()[i];
+        final int currencyCount = hand.getCount() * DiamondEconomyConfig.getCurrencyValues()[i];
         if (dm.changeBalance(player.getStringUUID(), currencyCount)) {
-            String output = "Added $" + currencyCount + " to your account";
-            ctx.getSource().sendSuccess(() -> Component.literal(output), false);
+            ctx.getSource().sendSuccess(() ->
+                    Component.literal("Added ")
+                            .append(DiamondEconomyConfig.currencyToLiteral(currencyCount))
+                            .append(" to your account")
+            , false);
             player.getInventory().removeFromSelected(true); // remove whole stack
             return currencyCount;
         } else {
-            throw CommandExceptions.BALANCE_ERROR.create("Error; could not add currency to your account.");
+            throw CommandExceptions.MAX_BALANCE_ERROR.create();
         }
     }
 }

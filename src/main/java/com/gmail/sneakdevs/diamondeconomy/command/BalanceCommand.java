@@ -10,6 +10,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 public class BalanceCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> buildCommand(){
@@ -34,7 +35,16 @@ public class BalanceCommand {
     public static int balanceCommand(CommandContext<CommandSourceStack> ctx, String player) {
         DatabaseManager dm = DiamondUtils.getDatabaseManager();
         int bal = dm.getBalanceFromName(player);
-        ctx.getSource().sendSuccess(() -> Component.literal((bal > -1) ? (player + " has $" + bal) : ("No account was found for player with the name \"" + player + "\"")), false);
-        return 1;
+        if (bal > -1) {
+            ctx.getSource().sendSuccess(() ->
+                    Component.literal(player + " has ")
+                            .append(DiamondEconomyConfig.currencyToLiteral(bal))
+            , false);
+        } else {
+            ctx.getSource().sendFailure(
+                    Component.literal("No account found for player " + player)
+            );
+        }
+        return bal;
     }
 }

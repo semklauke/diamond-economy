@@ -5,10 +5,11 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
@@ -50,9 +51,45 @@ public class DiamondEconomyConfig implements ConfigData {
     @Comment("Amount of money to add each cycle")
     public int moneyAddAmount = 0;
 
+    @Comment("Symbol for the currency used in chat. You can specify a prefix and suffix")
+    public String currencySymbolPrefix = "$";
+    public String currencySymbolSuffix = ">";
+
+    @Comment("Color of currency amount in chat. Leave blank for no color (hex value starting with # or a color name)")
+    public String currencyColor = "#AAAAAA";
+
     @Comment("Permission level (1-4) of the op commands in diamond economy. Set to 2 to allow command blocks to use these commands.")
     public int opCommandsPermissionLevel = 4;
 
+    public void validatePostLoad() throws ValidationException {
+        // TODO
+    }
+
+    public Style getCurrentyStyle() {
+        if (!this.currencyColor.isEmpty()) {
+            TextColor color;
+            if (this.currencyColor.charAt(0) == '#') {
+                // hex
+                color = TextColor.fromRgb(Integer.parseInt(this.currencyColor.substring(1), 16));
+            } else {
+                // by name
+                color = TextColor.parseColor(this.currencyColor);
+            }
+            if (color != null)
+                return Style.EMPTY.withColor(color);
+        }
+        return Style.EMPTY;
+    }
+
+    public static MutableComponent currencyToLiteral(int c) {
+        DiamondEconomyConfig inst = DiamondEconomyConfig.getInstance();
+        String currencyStr = inst.currencySymbolPrefix + c + inst.currencySymbolSuffix;
+        return Component.literal(currencyStr).setStyle(inst.getCurrentyStyle());
+    }
+
+    public static String currencyToString(int c) {
+        return currencyToLiteral(c).getString();
+    }
     public static Item getCurrency(int num) {
         return BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(DiamondEconomyConfig.getInstance().currencies[num]));
     }

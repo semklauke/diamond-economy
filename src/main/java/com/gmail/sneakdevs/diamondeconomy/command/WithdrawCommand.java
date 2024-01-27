@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
-
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 public class WithdrawCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> buildCommand(CommandBuildContext buildContext){
@@ -28,6 +28,7 @@ public class WithdrawCommand {
                                     return withdrawCommand(e, amount);
                                 }).then(
                                         Commands.argument("item", ItemArgument.item(buildContext))
+                                                .suggests(item_suggester)
                                                 .executes(e -> {
                                                     int amount = IntegerArgumentType.getInteger(e, "amount");
                                                     Item item = ItemArgument.getItem(e, "item").getItem();
@@ -117,5 +118,13 @@ public class WithdrawCommand {
         }
         return 1;
     }
+
+    private static final SuggestionProvider<CommandSourceStack> item_suggester = (context, builder) -> {
+
+        for (String ident : DiamondEconomyConfig.getInstance().currencies) {
+            builder.suggest(ident);
+        }
+        return builder.buildFuture();
+    };
 
 }

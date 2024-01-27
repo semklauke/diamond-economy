@@ -48,7 +48,9 @@ public class DepositCommand {
         if (dm.changeBalance(player.getStringUUID(), currencyCount)) {
             int finalCurrencyCount = currencyCount;
             ctx.getSource().sendSuccess(() ->
-                    Component.literal("Added ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append("Added ")
                             .append(DiamondEconomyConfig.currencyToLiteral(finalCurrencyCount))
                             .append(" to your account")
             , false);
@@ -78,6 +80,7 @@ public class DepositCommand {
             // Hand has no item
             ctx.getSource().sendFailure(
                 Component.empty()
+                        .append(DiamondEconomyConfig.ChatPrefix())
                         .append("Put a currency item in your hand or use the /")
                         .append(Component.literal(DiamondEconomyConfig.getInstance().depositCommandName + " deposit inv [amount]")
                                         .withStyle(Style.EMPTY.withItalic(true))
@@ -90,7 +93,9 @@ public class DepositCommand {
         final int currencyCount = hand.getCount() * DiamondEconomyConfig.getCurrencyValues()[i];
         if (dm.changeBalance(player.getStringUUID(), currencyCount)) {
             ctx.getSource().sendSuccess(() ->
-                    Component.literal("Added ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append("Added ")
                             .append(DiamondEconomyConfig.currencyToLiteral(currencyCount))
                             .append(" to your account")
             , false);

@@ -37,7 +37,9 @@ public class BalanceCommand {
         int bal = dm.getBalanceFromName(player);
         if (bal > -1) {
             ctx.getSource().sendSuccess(() ->
-                    Component.literal(player + " has ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append(player + " has ")
                             .append(DiamondEconomyConfig.currencyToLiteral(bal))
             , false);
         } else {

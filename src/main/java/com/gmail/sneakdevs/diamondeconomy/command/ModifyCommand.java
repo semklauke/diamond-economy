@@ -68,7 +68,9 @@ public class ModifyCommand {
             if (dm.changeBalance(playerUUID, amount)) {
                 if (players.size() == 1) {
                     ctx.getSource().sendSuccess(() ->
-                            Component.literal(amount >= 0 ? "Increased " : "Decreased ")
+                            Component.empty()
+                                    .append(DiamondEconomyConfig.ChatPrefix())
+                                    .append(amount >= 0 ? "Increased " : "Decreased ")
                                     .append(playerName)
                                     .append("'s account by ")
                                     .append(DiamondEconomyConfig.currencyToLiteral(amount))
@@ -79,7 +81,9 @@ public class ModifyCommand {
                 successCount++;
             } else {
                 ctx.getSource().sendFailure(
-                        Component.literal("For ")
+                        Component.empty()
+                                .append(DiamondEconomyConfig.ChatPrefix())
+                                .append("For ")
                                 .append(playerName)
                                 .append(" the balance limit was exceeded. No changes.")
                                 //.withStyle(Style.EMPTY.withColor(0xff5555))
@@ -91,7 +95,9 @@ public class ModifyCommand {
         if (successCount > 1) {
             int finalSuccessCount = successCount;
             ctx.getSource().sendSuccess(() ->
-                    Component.literal(amount >= 0 ? "Increased " : "Decreased ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append(amount >= 0 ? "Increased " : "Decreased ")
                             .append(finalSuccessCount + "(from " + players.size() + ") accounts by ")
                             .append(DiamondEconomyConfig.currencyToLiteral(amount))
             , true);
@@ -104,7 +110,9 @@ public class ModifyCommand {
         if (shouldModifyAll) {
             dm.changeAllBalance(amount);
             ctx.getSource().sendSuccess(() ->
-                    Component.literal(amount >= 0 ? "Increased " : "Decreased")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append(amount >= 0 ? "Increased " : "Decreased")
                             .append(" everyone's account by ")
                             .append(DiamondEconomyConfig.currencyToLiteral(amount))
             , true);
@@ -112,7 +120,9 @@ public class ModifyCommand {
             ServerPlayer player = ctx.getSource().getPlayerOrException();
             if (dm.changeBalance(player.getStringUUID(), amount)) {
                 ctx.getSource().sendSuccess(() ->
-                        Component.literal(amount >= 0 ? "Increased " : "Decreased")
+                        Component.empty()
+                                .append(DiamondEconomyConfig.ChatPrefix())
+                                .append(amount >= 0 ? "Increased " : "Decreased")
                                 .append(" your account by ")
                                 .append(DiamondEconomyConfig.currencyToLiteral(amount))
                                 .append(". New balance: ")
@@ -120,7 +130,9 @@ public class ModifyCommand {
                 , true);
             } else {
                ctx.getSource().sendFailure(
-                       Component.literal("The balance limit for your account was exceeded. No changes.")
+                       Component.empty()
+                               .append(DiamondEconomyConfig.ChatPrefix())
+                               .append("The balance limit for your account was exceeded. No changes.")
                );
             }
         }

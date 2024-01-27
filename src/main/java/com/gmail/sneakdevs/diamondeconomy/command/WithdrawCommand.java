@@ -32,13 +32,16 @@ public class WithdrawCommand {
         DatabaseManager dm = DiamondUtils.getDatabaseManager();
         if (dm.changeBalance(player.getStringUUID(), -amount)) {
             ctx.getSource().sendSuccess(() ->
-                    Component.literal("Withdrew ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append("Withdrew ")
                             .append(DiamondEconomyConfig.currencyToLiteral(amount - DiamondUtils.dropItem(amount, player)))
             , false);
         } else {
             int balance = dm.getBalanceFromUUID(player.getStringUUID());
             ctx.getSource().sendFailure(
                     Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
                             .append(Component.literal("Insufficient funds! ")
                                     .withStyle(Style.EMPTY.withColor(TextColor.parseColor("dark_red")))
                             )

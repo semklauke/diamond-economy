@@ -68,7 +68,9 @@ public class SetCommand {
             if (dm.setBalance(playerUUID, amount)) {
                 if (players.size() == 1) {
                     ctx.getSource().sendSuccess(() ->
-                            Component.literal("Set balance of ")
+                            Component.empty()
+                                    .append(DiamondEconomyConfig.ChatPrefix())
+                                    .append("Set balance of ")
                                     .append(playerName)
                                     .append(" to ")
                                     .append(DiamondEconomyConfig.currencyToLiteral(amount))
@@ -77,10 +79,11 @@ public class SetCommand {
                 successCount++;
             } else {
                 ctx.getSource().sendFailure(
-                        Component.literal("For ")
+                        Component.empty()
+                                .append(DiamondEconomyConfig.ChatPrefix())
+                                .append("For ")
                                 .append(playerName)
                                 .append(" the balance limit was exceeded. No changes.")
-                                //.withStyle(Style.EMPTY.withColor(0xff5555))
                );
             }
         }
@@ -88,7 +91,9 @@ public class SetCommand {
         if (successCount > 1) {
             int finalSuccessCount = successCount;
             ctx.getSource().sendSuccess(() ->
-                    Component.literal("Set balance of ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append("Set balance of ")
                             .append(finalSuccessCount + "(from " + players.size() + ") accounts to ")
                             .append(DiamondEconomyConfig.currencyToLiteral(amount))
             , true);
@@ -100,13 +105,17 @@ public class SetCommand {
         if (shouldModifyAll) {
             DiamondUtils.getDatabaseManager().setAllBalance(amount);
             ctx.getSource().sendSuccess(() ->
-                    Component.literal("All accounts balance to ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append("All accounts balance to ")
                             .append(DiamondEconomyConfig.currencyToLiteral(amount))
             , true);
         } else {
             DiamondUtils.getDatabaseManager().setBalance(ctx.getSource().getPlayerOrException().getStringUUID(), amount);
             ctx.getSource().sendSuccess(() ->
-                    Component.literal("Updated your balance to ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append("Updated your balance to ")
                             .append(DiamondEconomyConfig.currencyToLiteral(amount))
             , true);
         }

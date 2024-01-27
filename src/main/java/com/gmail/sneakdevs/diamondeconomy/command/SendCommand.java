@@ -71,14 +71,18 @@ public class SendCommand {
             dm.changeBalance(playerUUID, amount);
 
             ctx.getSource().sendSuccess(() ->
-                    Component.literal("Sent ")
+                    Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
+                            .append("Sent ")
                             .append(DiamondEconomyConfig.currencyToLiteral(amount))
                             .append(" to " + playerName)
             , false);
 
             if (serverPlayer != null) {
                 serverPlayer.displayClientMessage(
-                        Component.literal("You received ")
+                        Component.empty()
+                                .append(DiamondEconomyConfig.ChatPrefix())
+                                .append("You received ")
                                 .append(DiamondEconomyConfig.currencyToLiteral(amount))
                                 .append(" from ")
                                 .append(serverPlayer1.getDisplayName())
@@ -87,6 +91,7 @@ public class SendCommand {
         } else {
             ctx.getSource().sendFailure(
                     Component.empty()
+                            .append(DiamondEconomyConfig.ChatPrefix())
                             .append(Component.literal("Insufficient funds! ")
                                     .withStyle(Style.EMPTY.withColor(TextColor.parseColor("dark_red")))
                             )

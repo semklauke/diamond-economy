@@ -53,11 +53,16 @@ public class DiamondEconomyConfig implements ConfigData {
 
     @Comment("Symbol for the currency used in chat. You can specify a prefix and suffix")
     public String currencySymbolPrefix = "$";
-    public String currencySymbolSuffix = ">";
+    public String currencySymbolSuffix = "";
 
     @Comment("Color of currency amount in chat. Leave blank for no color (hex value starting with # or a color name)")
     public String currencyColor = "#AAAAAA";
 
+    @Comment("Prefix for chat messages from this mod")
+    public String chatPrefix = "[💰]";
+
+    @Comment("Color of currency amount in chat. Leave blank for no color (hex value starting with # or a color name)")
+    public String chatPrefixColor = "#306844";
     @Comment("Permission level (1-4) of the op commands in diamond economy. Set to 2 to allow command blocks to use these commands.")
     public int opCommandsPermissionLevel = 4;
 
@@ -65,31 +70,47 @@ public class DiamondEconomyConfig implements ConfigData {
         // TODO
     }
 
-    public Style getCurrentyStyle() {
-        if (!this.currencyColor.isEmpty()) {
-            TextColor color;
-            if (this.currencyColor.charAt(0) == '#') {
-                // hex
-                color = TextColor.fromRgb(Integer.parseInt(this.currencyColor.substring(1), 16));
-            } else {
-                // by name
-                color = TextColor.parseColor(this.currencyColor);
-            }
-            if (color != null)
-                return Style.EMPTY.withColor(color);
-        }
+    public Style getCurrencyStyle() {
+        TextColor color = DiamondEconomyConfig.parseConfigColor(this.currencyColor);
+        if (color != null)
+            return Style.EMPTY.withColor(color);
         return Style.EMPTY;
+    }
+
+    public Style getPrefixStyle() {
+        TextColor color = DiamondEconomyConfig.parseConfigColor(this.chatPrefixColor);
+        if (color != null)
+            return Style.EMPTY.withColor(color);
+        return Style.EMPTY;
+    }
+
+    private static TextColor parseConfigColor(String in) {
+        if (in.isEmpty() || in.isBlank())
+            return null;
+        if (in.charAt(0) == '#') {
+            // hex
+            return TextColor.fromRgb(Integer.parseInt(in.substring(1), 16));
+        } else {
+            // by name
+            return TextColor.parseColor(in);
+        }
+    }
+
+    public static MutableComponent ChatPrefix() {
+        DiamondEconomyConfig inst = DiamondEconomyConfig.getInstance();
+        return Component.literal(inst.chatPrefix + " ").withStyle(inst.getPrefixStyle());
     }
 
     public static MutableComponent currencyToLiteral(int c) {
         DiamondEconomyConfig inst = DiamondEconomyConfig.getInstance();
         String currencyStr = inst.currencySymbolPrefix + c + inst.currencySymbolSuffix;
-        return Component.literal(currencyStr).setStyle(inst.getCurrentyStyle());
+        return Component.literal(currencyStr).setStyle(inst.getCurrencyStyle());
     }
 
     public static String currencyToString(int c) {
         return currencyToLiteral(c).getString();
     }
+
     public static Item getCurrency(int num) {
         return BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(DiamondEconomyConfig.getInstance().currencies[num]));
     }

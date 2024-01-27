@@ -10,10 +10,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
+import com.mojang.authlib.GameProfile;
 
 import java.util.Collection;
 
@@ -22,12 +22,12 @@ public class ModifyCommand {
         return Commands.literal(DiamondEconomyConfig.getInstance().modifyCommandName)
                 .requires((permission) -> permission.hasPermission(DiamondEconomyConfig.getInstance().opCommandsPermissionLevel))
                 .then(
-                        Commands.argument("players", EntityArgument.players())
+                        Commands.argument("players", GameProfileArgument.gameProfile())
                                 .then(
                                         Commands.argument("amount", IntegerArgumentType.integer())
                                                 .executes(e -> {
                                                     int amount = IntegerArgumentType.getInteger(e, "amount");
-                                                    return modifyCommand(e, EntityArgument.getPlayers(e, "players").stream().toList(), amount);
+                                                    return modifyCommand(e, GameProfileArgument.getGameProfiles(e, "players"), amount);
                                                 }))
                 )
                 .then(
@@ -47,28 +47,56 @@ public class ModifyCommand {
                 );
     }
 
-    public static int modifyCommand(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, int amount) {
+    public static int modifyCommand(CommandContext<CommandSourceStack> ctx, Collection<GameProfile> players, int amount) {
         DatabaseManager dm = DiamondUtils.getDatabaseManager();
-        for (ServerPlayer player : players) {
-            if (dm.changeBalance(player.getStringUUID(), amount)) {
-                ctx.getSource().sendSuccess(() ->
-                        Component.literal(amount >= 0 ? "Increased " : "Decreased")
-                                .append(player.getDisplayName() +"'s account by ")
-                                .append(DiamondEconomyConfig.currencyToLiteral(amount))
-                                .append(". New balance: ")
-                                .append(DiamondEconomyConfig.currencyToString(dm.getBalanceFromUUID(player.getStringUUID())))
-                , true);
+        int successCount = 0;
+        for (GameProfile player : players) {
+            ServerPlayer serverPlayer = ctx.getSource().getServer().getPlayerList().getPlayerByName(player.getName());
+            String playerUUID;
+            if (serverPlayer != null)
+                playerUUID = serverPlayer.getStringUUID();
+            else
+                playerUUID = dm.getUUIDFromName(player.getName());
+
+            if (playerUUID == null) {
+                // Player does not exist on server or database
+                ctx.getSource().sendFailure(Component.literal("Player '" + player.getName() + "' found."));
+                continue;
+            }
+
+            Component playerName = serverPlayer != null ? serverPlayer.getDisplayName() : Component.literal(player.getName());
+            if (dm.changeBalance(playerUUID, amount)) {
+                if (players.size() == 1) {
+                    ctx.getSource().sendSuccess(() ->
+                            Component.literal(amount >= 0 ? "Increased " : "Decreased ")
+                                    .append(playerName)
+                                    .append("'s account by ")
+                                    .append(DiamondEconomyConfig.currencyToLiteral(amount))
+                                    .append(". New balance: ")
+                                    .append(DiamondEconomyConfig.currencyToString(dm.getBalanceFromUUID(playerUUID)))
+                    , true);
+                }
+                successCount++;
             } else {
-               ctx.getSource().sendFailure(
+                ctx.getSource().sendFailure(
                         Component.literal("For ")
-                                .append(player.getDisplayName())
+                                .append(playerName)
                                 .append(" the balance limit was exceeded. No changes.")
                                 //.withStyle(Style.EMPTY.withColor(0xff5555))
                );
             }
 
         }
-        return players.size();
+
+        if (successCount > 1) {
+            int finalSuccessCount = successCount;
+            ctx.getSource().sendSuccess(() ->
+                    Component.literal(amount >= 0 ? "Increased " : "Decreased ")
+                            .append(finalSuccessCount + "(from " + players.size() + ") accounts by ")
+                            .append(DiamondEconomyConfig.currencyToLiteral(amount))
+            , true);
+        }
+        return successCount;
     }
 
     public static int modifyCommand(CommandContext<CommandSourceStack> ctx, int amount, boolean shouldModifyAll) throws CommandSyntaxException {

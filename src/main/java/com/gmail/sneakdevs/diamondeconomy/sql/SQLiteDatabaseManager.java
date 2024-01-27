@@ -81,11 +81,15 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public int getBalanceFromUUID(String uuid){
+        if (!uuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return -1;
+        }
+
         String sql = "SELECT uuid, money FROM diamonds WHERE uuid = '" + uuid + "'";
 
-        try (Connection conn = this.connect(); Statement stmt  = conn.createStatement(); ResultSet rs    = stmt.executeQuery(sql)){
-            rs.next();
-            return rs.getInt("money");
+        try (Connection conn = this.connect(); Statement stmt  = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
+            if (rs.next())
+                return rs.getInt("money");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -93,11 +97,15 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public String getNameFromUUID(String uuid){
+        if (!uuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return null;
+        }
+
         String sql = "SELECT uuid, name FROM diamonds WHERE uuid = '" + uuid + "'";
 
         try (Connection conn = this.connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
-            rs.next();
-            return rs.getString("name");
+            if(rs.next())
+                return rs.getString("name");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -108,8 +116,8 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         String sql = "SELECT name, money FROM diamonds WHERE name = '" + name + "'";
 
         try (Connection conn = this.connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
-            rs.next();
-            return rs.getInt("money");
+            if (rs.next())
+                return rs.getInt("money");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -150,7 +158,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
 
         try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             int bal = getBalanceFromUUID(uuid);
-            if (bal + money >= 0 && bal + money < Integer.MAX_VALUE) {
+            if (bal >= -1 && bal + money >= 0 && bal + money < Integer.MAX_VALUE) {
                 pstmt.setInt(1, bal + money);
                 pstmt.setString(2, uuid);
                 pstmt.executeUpdate();
@@ -172,6 +180,17 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         }
     }
 
+    public String getUUIDFromName(String name) {
+        String sql = "SELECT uuid FROM diamonds WHERE name = '" + name + "' COLLATE NOCASE";
+
+        try (Connection conn = this.connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
+            if (rs.next())
+                return rs.getString("uuid");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public String top(String uuid, int page){
         String sql = "SELECT uuid, name, money FROM diamonds ORDER BY money DESC";
         String rankings = "";

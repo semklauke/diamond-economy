@@ -17,6 +17,8 @@ public interface DatabaseManager {
     boolean changeBalance(String uuid, int money);
     void changeAllBalance(int money);
 
+    String getUUIDFromName(String name);
+
     String top(String uuid, int topAmount);
     String rank(int rank);
     int playerRank(String uuid);

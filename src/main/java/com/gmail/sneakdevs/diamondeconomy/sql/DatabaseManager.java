@@ -22,4 +22,9 @@ public interface DatabaseManager {
     String top(String uuid, int topAmount);
     String rank(int rank);
     int playerRank(String uuid);
+
+    public boolean setTaxlevel(String uuid, int taxlevel);
+    public int getTaxlevel(String uuid);
+    public int taxAll(int percentage, int minTaxlevel);
+    public boolean taxPlayerUUID(String uuid, int percentage);
 }

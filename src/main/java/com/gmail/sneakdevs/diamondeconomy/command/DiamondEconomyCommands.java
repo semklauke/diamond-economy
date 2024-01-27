@@ -30,6 +30,9 @@ public class DiamondEconomyCommands {
             if (DiamondEconomyConfig.getInstance().withdrawCommandName != null) {
                 dispatcher.register(WithdrawCommand.buildCommand(context));
             }
+            if (DiamondEconomyConfig.getInstance().taxCommandName != null) {
+                dispatcher.register(TaxCommand.buildCommand());
+            }
         } else {
             if (DiamondEconomyConfig.getInstance().modifyCommandName != null) {
                 dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(ModifyCommand.buildCommand()));
@@ -51,6 +54,9 @@ public class DiamondEconomyCommands {
             }
             if (DiamondEconomyConfig.getInstance().withdrawCommandName != null) {
                 dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(WithdrawCommand.buildCommand(context)));
+            }
+            if (DiamondEconomyConfig.getInstance().taxCommandName != null) {
+                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(TaxCommand.buildCommand()));
             }
         }
     }

@@ -58,8 +58,8 @@ public class SendCommand {
 
         if (playerUUID == null || playerName == null || playerUUID.isEmpty() || playerName.isEmpty()) {
             // Player does not exist on server or database
-            ctx.getSource().sendFailure(Component.literal("Player not found."));
-            return -1;
+            throw CommandExceptions.PLAYER_NOT_FOUND.create();
+            // TODO is this better? ctx.getSource().sendFailure(Component.literal("Player not found."));
         }
 
         long newValue = dm.getBalanceFromUUID(playerUUID) + (long) amount;

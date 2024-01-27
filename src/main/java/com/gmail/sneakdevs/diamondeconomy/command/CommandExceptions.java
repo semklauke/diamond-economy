@@ -16,4 +16,8 @@ public class CommandExceptions {
     public static final SimpleCommandExceptionType MAX_BALANCE_ERROR = new SimpleCommandExceptionType(
             Component.literal("You exceed the balance limit. The bank can't store that much money, sorry!")
     );
+
+    public static final SimpleCommandExceptionType PLAYER_NOT_FOUND = new SimpleCommandExceptionType(
+            Component.literal("Player not found.")
+    );
 }

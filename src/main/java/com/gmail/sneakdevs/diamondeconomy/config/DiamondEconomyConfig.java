@@ -34,6 +34,7 @@ public class DiamondEconomyConfig implements ConfigData {
     public String depositCommandName = "deposit";
     public String sendCommandName = "send";
     public String withdrawCommandName = "withdraw";
+    public String taxCommandName = "tax";
 
     @Comment("Names of the admin subcommands (null to disable command)")
     public String setCommandName = "set";
@@ -63,6 +64,9 @@ public class DiamondEconomyConfig implements ConfigData {
 
     @Comment("Color of currency amount in chat. Leave blank for no color (hex value starting with # or a color name)")
     public String chatPrefixColor = "#306844";
+
+    @Comment("Default percentage for the tax command (can e.g. be scheduled by a cronjob)")
+    public int defaulTaxPercentage = 3;
     @Comment("Permission level (1-4) of the op commands in diamond economy. Set to 2 to allow command blocks to use these commands.")
     public int opCommandsPermissionLevel = 4;
 
@@ -111,6 +115,9 @@ public class DiamondEconomyConfig implements ConfigData {
         return currencyToLiteral(c).getString();
     }
 
+    public static int getDefaultTax(int balance) {
+        return (int) Math.round(DiamondEconomyConfig.getInstance().defaulTaxPercentage * 0.01 * balance);
+    }
     public static Item getCurrency(int num) {
         return BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(DiamondEconomyConfig.getInstance().currencies[num]));
     }

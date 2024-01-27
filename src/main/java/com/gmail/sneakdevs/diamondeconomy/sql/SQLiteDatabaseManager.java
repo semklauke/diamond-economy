@@ -43,7 +43,8 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public void addPlayer(String uuid, String name) {
-        String sql = "INSERT INTO diamonds(uuid,name,money) VALUES(?,?,?)";
+        if (invalidUUID(uuid)) return;
+        String sql = "INSERT INTO diamonds(uuid,name,money,taxlevel) VALUES(?,?,?,1)";
 
         try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1, uuid);
@@ -56,6 +57,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public void updateName(String uuid, String name) {
+        if (invalidUUID(uuid)) return;
         String sql = "UPDATE diamonds SET name = ? WHERE uuid = ?";
 
         try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -68,6 +70,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public void setName(String uuid, String name) {
+        if (invalidUUID(uuid)) return;
         String sql = "UPDATE diamonds SET name = ? WHERE uuid != ? AND name = ?";
 
         try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -81,10 +84,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public int getBalanceFromUUID(String uuid){
-        if (!uuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
-            return -1;
-        }
-
+        if (invalidUUID(uuid)) return -1;
         String sql = "SELECT uuid, money FROM diamonds WHERE uuid = '" + uuid + "'";
 
         try (Connection conn = this.connect(); Statement stmt  = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
@@ -97,10 +97,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public String getNameFromUUID(String uuid){
-        if (!uuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
-            return null;
-        }
-
+        if (invalidUUID(uuid)) return null;
         String sql = "SELECT uuid, name FROM diamonds WHERE uuid = '" + uuid + "'";
 
         try (Connection conn = this.connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
@@ -125,6 +122,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public boolean setBalance(String uuid, int money) {
+        if (invalidUUID(uuid)) return false;
         String sql = "UPDATE diamonds SET money = ? WHERE uuid = ?";
 
         try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -154,6 +152,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public boolean changeBalance(String uuid, int money) {
+        if (invalidUUID(uuid)) return false;
         String sql = "UPDATE diamonds SET money = ? WHERE uuid = ?";
 
         try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -192,7 +191,9 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         return null;
     }
     public String top(String uuid, int page){
+        if (invalidUUID(uuid)) return null;
         String sql = "SELECT uuid, name, money FROM diamonds ORDER BY money DESC";
+
         String rankings = "";
         int i = 0;
         int playerRank = 0;
@@ -235,6 +236,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     public int playerRank(String uuid){
+        if (invalidUUID(uuid)) return -1;
         String sql = "SELECT uuid FROM diamonds ORDER BY money DESC";
         int repeats = 1;
 
@@ -249,5 +251,67 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public boolean setTaxlevel(String uuid, int taxlevel) {
+        if (invalidUUID(uuid)) return false;
+        String sql = "UPDATE diamonds SET taxlevel = ? WHERE uuid = ?";
+
+        try (Connection conn = this.connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, taxlevel);
+            stmt.setString(2, uuid);
+            return (stmt.executeUpdate() == 1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public int getTaxlevel(String uuid) {
+        if (invalidUUID(uuid)) return -1;
+        String sql = "SELECT taxlevel FROM diamonds WHERE uuid = ? LIMIT 1";
+
+        try (Connection conn = this.connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next())
+                return rs.getInt("taxlevel");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public int taxAll(int percentage, int minTaxlevel) {
+        if (percentage < 1 || percentage > 100 || minTaxlevel < 0)
+            return -1;
+        String sql = "UPDATE diamonds SET money = money - round(money * ?,0) WHERE taxlevel >= ?";
+
+        try (Connection conn = this.connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, percentage * 0.01);
+            stmt.setInt(2, minTaxlevel);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public boolean taxPlayerUUID(String uuid, int percentage) {
+          if (percentage < 1 || percentage > 100 || invalidUUID(uuid))
+              return false;
+          String sql = "UPDATE diamonds SET money = money - round(money * ?,0) WHERE uuid = ?";
+
+          try (Connection conn = this.connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+              stmt.setDouble(1, percentage * 0.01);
+              stmt.setString(2, uuid);
+              return (stmt.executeUpdate() == 1);
+          } catch (SQLException e) {
+              e.printStackTrace();
+          }
+          return false;
+    }
+    private boolean invalidUUID(String uuid) {
+        return !uuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
     }
 }

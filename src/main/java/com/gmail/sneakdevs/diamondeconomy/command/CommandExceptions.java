@@ -9,6 +9,10 @@ public class CommandExceptions {
             o -> Component.literal((String) o)
     );
 
+    public static final DynamicCommandExceptionType ITEM_ERROR = new DynamicCommandExceptionType(
+            o -> Component.literal((String) o)
+    );
+
     public static final SimpleCommandExceptionType MAX_BALANCE_ERROR = new SimpleCommandExceptionType(
             Component.literal("You exceed the balance limit. The bank can't store that much money, sorry!")
     );

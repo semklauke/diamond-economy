@@ -76,7 +76,7 @@ public class DiamondEconomy implements ModInitializer {
     public void onInitialize() {
         AutoConfig.register(DiamondEconomyConfig.class, JanksonConfigSerializer::new);
         registerPlaceholders();
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> DiamondEconomyCommands.register(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> DiamondEconomyCommands.register(dispatcher, registryAccess));
         ServerLifecycleEvents.SERVER_STARTING.register(DiamondEconomy::initServer);
     }
 }

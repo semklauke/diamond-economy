@@ -4,9 +4,10 @@ import com.gmail.sneakdevs.diamondeconomy.config.DiamondEconomyConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandBuildContext;
 
 public class DiamondEconomyCommands {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context) {
         if (DiamondEconomyConfig.getInstance().commandName == null) {
             if (DiamondEconomyConfig.getInstance().modifyCommandName != null) {
                 dispatcher.register(ModifyCommand.buildCommand());
@@ -27,7 +28,7 @@ public class DiamondEconomyCommands {
                 dispatcher.register(SetCommand.buildCommand());
             }
             if (DiamondEconomyConfig.getInstance().withdrawCommandName != null) {
-                dispatcher.register(WithdrawCommand.buildCommand());
+                dispatcher.register(WithdrawCommand.buildCommand(context));
             }
         } else {
             if (DiamondEconomyConfig.getInstance().modifyCommandName != null) {
@@ -49,7 +50,7 @@ public class DiamondEconomyCommands {
                 dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(SetCommand.buildCommand()));
             }
             if (DiamondEconomyConfig.getInstance().withdrawCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(WithdrawCommand.buildCommand()));
+                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(WithdrawCommand.buildCommand(context)));
             }
         }
     }

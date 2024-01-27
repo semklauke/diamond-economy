@@ -66,4 +66,20 @@ public class DiamondUtils {
 
         return amount;
     }
+
+    // returns remaining items, that didn't fit the inventory
+    public static int giveItem(Item item, int itemAmount, ServerPlayer player) {
+        int stackSize = item.getMaxStackSize();
+
+        while (itemAmount > 0) {
+            int itemOut = Math.min(itemAmount, stackSize);
+            player.getInventory().placeItemBackInInventory(new ItemStack(item, itemOut));
+            itemAmount -= itemOut;
+        }
+        // TODO:
+        /* Atm, this always returns 0, since placeItemBackInInventory just drops the items that
+         *  don't fit in the ivv. But keeps this if we find a better solution the future.
+         */
+        return itemAmount;
+    }
 }

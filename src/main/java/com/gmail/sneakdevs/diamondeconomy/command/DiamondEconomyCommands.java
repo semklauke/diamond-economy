@@ -5,59 +5,44 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandBuildContext;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.commands.CommandSourceStack;
+
+import java.util.function.Consumer;
 
 public class DiamondEconomyCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context) {
+        // Determine register function (register command with mod prefix ?)
+        Consumer<LiteralArgumentBuilder<CommandSourceStack>> registerFunc;
         if (DiamondEconomyConfig.getInstance().commandName == null) {
-            if (DiamondEconomyConfig.getInstance().modifyCommandName != null) {
-                dispatcher.register(ModifyCommand.buildCommand());
-            }
-            if (DiamondEconomyConfig.getInstance().balanceCommandName != null) {
-                dispatcher.register(BalanceCommand.buildCommand());
-            }
-            if (DiamondEconomyConfig.getInstance().topCommandName != null) {
-                dispatcher.register(TopCommand.buildCommand());
-            }
-            if (DiamondEconomyConfig.getInstance().depositCommandName != null) {
-                dispatcher.register(DepositCommand.buildCommand());
-            }
-            if (DiamondEconomyConfig.getInstance().sendCommandName != null) {
-                dispatcher.register(SendCommand.buildCommand());
-            }
-            if (DiamondEconomyConfig.getInstance().setCommandName != null) {
-                dispatcher.register(SetCommand.buildCommand());
-            }
-            if (DiamondEconomyConfig.getInstance().withdrawCommandName != null) {
-                dispatcher.register(WithdrawCommand.buildCommand(context));
-            }
-            if (DiamondEconomyConfig.getInstance().taxCommandName != null) {
-                dispatcher.register(TaxCommand.buildCommand());
-            }
+            registerFunc = dispatcher::register;
         } else {
-            if (DiamondEconomyConfig.getInstance().modifyCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(ModifyCommand.buildCommand()));
-            }
-            if (DiamondEconomyConfig.getInstance().balanceCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(BalanceCommand.buildCommand()));
-            }
-            if (DiamondEconomyConfig.getInstance().topCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(TopCommand.buildCommand()));
-            }
-            if (DiamondEconomyConfig.getInstance().depositCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(DepositCommand.buildCommand()));
-            }
-            if (DiamondEconomyConfig.getInstance().sendCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(SendCommand.buildCommand()));
-            }
-            if (DiamondEconomyConfig.getInstance().setCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(SetCommand.buildCommand()));
-            }
-            if (DiamondEconomyConfig.getInstance().withdrawCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(WithdrawCommand.buildCommand(context)));
-            }
-            if (DiamondEconomyConfig.getInstance().taxCommandName != null) {
-                dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(TaxCommand.buildCommand()));
-            }
+            registerFunc = (builder) -> dispatcher.register(Commands.literal(DiamondEconomyConfig.getInstance().commandName).then(builder));
+        }
+
+        if (DiamondEconomyConfig.getInstance().modifyCommandName != null) {
+            registerFunc.accept(ModifyCommand.buildCommand());
+        }
+        if (DiamondEconomyConfig.getInstance().balanceCommandName != null) {
+            registerFunc.accept(BalanceCommand.buildCommand());
+        }
+        if (DiamondEconomyConfig.getInstance().topCommandName != null) {
+            registerFunc.accept(TopCommand.buildCommand());
+        }
+        if (DiamondEconomyConfig.getInstance().depositCommandName != null) {
+            registerFunc.accept(DepositCommand.buildCommand());
+        }
+        if (DiamondEconomyConfig.getInstance().sendCommandName != null) {
+            registerFunc.accept(SendCommand.buildCommand());
+        }
+        if (DiamondEconomyConfig.getInstance().setCommandName != null) {
+            registerFunc.accept(SetCommand.buildCommand());
+        }
+        if (DiamondEconomyConfig.getInstance().withdrawCommandName != null) {
+            registerFunc.accept(WithdrawCommand.buildCommand(context));
+        }
+        if (DiamondEconomyConfig.getInstance().taxCommandName != null) {
+            registerFunc.accept(TaxCommand.buildCommand());
         }
     }
 }

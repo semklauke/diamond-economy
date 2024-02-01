@@ -77,16 +77,17 @@ public class DepositCommand {
             }
         }
         if (hand.isEmpty() || i == -1) {
-            // Hand has no item
+            // Hand has no currency item
             ctx.getSource().sendFailure(
                 Component.empty()
                         .append(DiamondEconomyConfig.ChatPrefix())
                         .append("Put a currency item in your hand or use the /")
-                        .append(Component.literal(DiamondEconomyConfig.getInstance().depositCommandName + " deposit inv [amount]")
+                        .append(Component.literal(DiamondEconomyConfig.getInstance().depositCommandName + " inv [amount]")
                                         .withStyle(Style.EMPTY.withItalic(true))
                         )
-                        .append("command.")
+                        .append(" command.")
             );
+            return -1;
         }
 
         // add balance to account

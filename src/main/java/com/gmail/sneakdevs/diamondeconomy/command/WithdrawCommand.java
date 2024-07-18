@@ -58,9 +58,9 @@ public class WithdrawCommand {
                     Component.empty()
                             .append(DiamondEconomyConfig.ChatPrefix())
                             .append(Component.literal("Insufficient funds! ")
-                                    .withStyle(Style.EMPTY.withColor(TextColor.parseColor("dark_red"))))
+                                    .withStyle(Style.EMPTY.withColor(TextColor.parseColor("dark_red").getOrThrow())))
                             .append(Component.literal("Your balance: ")
-                                    .withStyle(Style.EMPTY.withColor(TextColor.parseColor("white"))))
+                                    .withStyle(Style.EMPTY.withColor(TextColor.parseColor("white").getOrThrow())))
                             .append(DiamondEconomyConfig.currencyToLiteral(balance))
             );
         }
@@ -110,9 +110,9 @@ public class WithdrawCommand {
                     Component.empty()
                             .append(DiamondEconomyConfig.ChatPrefix())
                             .append(Component.literal("Insufficient funds! ")
-                                    .withStyle(Style.EMPTY.withColor(TextColor.parseColor("dark_red"))))
+                                    .withStyle(Style.EMPTY.withColor(TextColor.parseColor("dark_red").getOrThrow())))
                             .append(Component.literal("Your balance: ")
-                                    .withStyle(Style.EMPTY.withColor(TextColor.parseColor("white"))))
+                                    .withStyle(Style.EMPTY.withColor(TextColor.parseColor("white").getOrThrow())))
                             .append(DiamondEconomyConfig.currencyToLiteral(balance))
             );
         }

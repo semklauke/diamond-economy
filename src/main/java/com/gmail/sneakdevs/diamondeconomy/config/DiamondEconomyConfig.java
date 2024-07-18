@@ -96,7 +96,7 @@ public class DiamondEconomyConfig implements ConfigData {
             return TextColor.fromRgb(Integer.parseInt(in.substring(1), 16));
         } else {
             // by name
-            return TextColor.parseColor(in);
+            return TextColor.parseColor(in).getOrThrow();
         }
     }
 

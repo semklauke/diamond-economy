@@ -25,7 +25,7 @@ public class DiamondUtils {
             for (int i = DiamondEconomyConfig.getCurrencyValues().length - 1; i >= 0 && amount > 0; i--) {
 
                 int val = DiamondEconomyConfig.getCurrencyValues()[i];
-                int currSize = DiamondEconomyConfig.getCurrency(i).getMaxStackSize();
+                int currSize = DiamondEconomyConfig.getCurrency(i).getDefaultMaxStackSize();
                 Item curr = DiamondEconomyConfig.getCurrency(i);
 
                 while (amount >= val * currSize) {
@@ -45,7 +45,7 @@ public class DiamondUtils {
         } else {
 
             int val = DiamondEconomyConfig.getCurrencyValues()[0];
-            int currSize = DiamondEconomyConfig.getCurrency(0).getMaxStackSize();
+            int currSize = DiamondEconomyConfig.getCurrency(0).getDefaultMaxStackSize();
             Item curr = DiamondEconomyConfig.getCurrency(0);
 
             while (amount >= val * currSize) {
@@ -69,7 +69,7 @@ public class DiamondUtils {
 
     // returns remaining items, that didn't fit the inventory
     public static int giveItem(Item item, int itemAmount, ServerPlayer player) {
-        int stackSize = item.getMaxStackSize();
+        int stackSize = item.getDefaultMaxStackSize();
 
         while (itemAmount > 0) {
             int itemOut = Math.min(itemAmount, stackSize);
